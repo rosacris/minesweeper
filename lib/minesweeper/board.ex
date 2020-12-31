@@ -9,12 +9,13 @@ defmodule Minesweeper.Board do
   # Macros
   #
 
+  # Checks that the given row and col reside inside the board dimensions
   defguardp is_in_board(board, row, col)
             when is_map(board) and
-                 row >= 0 and
-                 col >= 0 and
-                 row < :erlang.map_get(:rows, board) and
-                 col < :erlang.map_get(:cols, board)
+                   row >= 0 and
+                   col >= 0 and
+                   row < :erlang.map_get(:rows, board) and
+                   col < :erlang.map_get(:cols, board)
 
   #
   # Public API
@@ -49,6 +50,7 @@ defmodule Minesweeper.Board do
   @spec get_cell(board(), non_neg_integer(), non_neg_integer()) :: Cell.t()
   def get_cell(board, row, col) when is_in_board(board, row, col),
     do: Enum.at(board.cells, row * board.cols + col)
+  def get_cell(_, _, _), do: raise "Invalid cell"
 
   def swipe(), do: raise("Unimplemented")
 
@@ -63,6 +65,7 @@ defmodule Minesweeper.Board do
 
     %{board | cells: updated_cells}
   end
+  def mark(_, _, _), do: raise "Invalid cell"
 
   def flag(), do: raise("Unimplemented")
 
@@ -71,6 +74,4 @@ defmodule Minesweeper.Board do
   #
   # Private functions
   #
-
-
 end

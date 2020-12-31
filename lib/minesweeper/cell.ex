@@ -11,8 +11,10 @@ defmodule Minesweeper.Board.Cell do
 
   @doc "Marks a cell as possible mine"
   @spec mark(cell()) :: cell()
+  def mark({row, col, payload, :marked} = cell), do: {row, col, payload, :unexplored}
   def mark({row, col, payload, :unexplored}), do: {row, col, payload, :marked}
-  def mark(cell), do: cell
+  def mark({row, col, payload, :flagged}), do: {row, col, payload, :marked}
+  def mark(_), do: raise("Invalid cell state")
 
   @doc "True if the given cell is a mine, false otherwise"
   @spec mine?(cell()) :: boolean()
