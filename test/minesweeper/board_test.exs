@@ -20,11 +20,19 @@ defmodule Minesweeper.BoardTest do
     assert Enum.all?(board.cells, &Board.Cell.unexplored?/1)
   end
 
+  test "get a cell" do
+    board = Board.new(10, 20, 50, @rnd_seed)
+    cell = Board.get_cell(board, 5, 10)
+
+    assert {5, 10, :mine, :unexplored} = cell
+    assert_raise(FunctionClauseError, fn -> Board.get_cell(board, 100, 100) end)
+  end
+
   test "mark a cell" do
     board = Board.new(10, 20, 50, @rnd_seed)
     updated_board = Board.mark(board, 5, 5)
-    market_cell = Board.get_cell(updated_board, 5, 5)
-    assert Board.Cell.marked?(market_cell)
-  end
 
+    assert Board.get_cell(updated_board, 5, 5) |> Board.Cell.marked?()
+    assert_raise(FunctionClauseError, fn -> Board.mark(board, 100, 100) end)
+  end
 end

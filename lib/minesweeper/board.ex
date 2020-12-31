@@ -6,6 +6,17 @@ defmodule Minesweeper.Board do
   @type board :: %{rows: non_neg_integer(), cols: non_neg_integer(), cells: list(Cell.t())}
 
   #
+  # Macros
+  #
+
+  defguardp is_in_board(board, row, col)
+            when is_map(board) and
+                 row >= 0 and
+                 col >= 0 and
+                 row < :erlang.map_get(:rows, board) and
+                 col < :erlang.map_get(:cols, board)
+
+  #
   # Public API
   #
 
@@ -36,14 +47,21 @@ defmodule Minesweeper.Board do
 
   @doc "Returns the cell at `row` `col`"
   @spec get_cell(board(), non_neg_integer(), non_neg_integer()) :: Cell.t()
-  def get_cell(board, row, col), do: Enum.at(board.cells, row * board.cols + col)
+  def get_cell(board, row, col) when is_in_board(board, row, col),
+    do: Enum.at(board.cells, row * board.cols + col)
 
   def swipe(), do: raise("Unimplemented")
 
   @doc "Marks the cell as possible mine"
   @spec mark(board(), non_neg_integer(), non_neg_integer()) :: board()
-  def mark(board, row, col) do
-    %{board | cells: Enum.map(board.cells, fn {row, col, _, _} = cell -> Cell.mark(cell) end)}
+  def mark(board, row, col) when is_in_board(board, row, col) do
+    updated_cells =
+      Enum.map(board.cells, fn
+        {^row, ^col, _, _} = cell -> Cell.mark(cell)
+        cell -> cell
+      end)
+
+    %{board | cells: updated_cells}
   end
 
   def flag(), do: raise("Unimplemented")
@@ -53,4 +71,6 @@ defmodule Minesweeper.Board do
   #
   # Private functions
   #
+
+
 end
