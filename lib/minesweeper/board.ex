@@ -1,10 +1,9 @@
 defmodule Minesweeper.Board do
   @moduledoc "Minesweeper board logic implementation"
 
-  @type payload :: :mine | :nomine
-  @type status :: :unexplored | :marked | :flagged | :cleared
-  @type cell :: {non_neg_integer(), non_neg_integer(), payload(), status()}
-  @type board :: %{rows: non_neg_integer(), cols: non_neg_integer(), cells: list(cell())}
+  alias Minesweeper.Board.Cell
+
+  @type board :: %{rows: non_neg_integer(), cols: non_neg_integer(), cells: list(Cell.t())}
 
   #
   # Public API
@@ -30,28 +29,26 @@ defmodule Minesweeper.Board do
     cells =
       for(i <- 0..(rows - 1), j <- 0..(cols - 1), do: {i, j})
       |> Enum.zip(payloads)
-      |> Enum.map(fn {{row, col}, payload} -> {row, col, payload, :unexplored} end)
+      |> Enum.map(fn {{row, col}, payload} -> Cell.new(row, col, payload, :unexplored) end)
 
     %{rows: rows, cols: cols, cells: cells}
   end
 
+  @doc "Returns the cell at `row` `col`"
+  @spec get_cell(board(), non_neg_integer(), non_neg_integer()) :: Cell.t()
+  def get_cell(board, row, col), do: Enum.at(board.cells, row * board.cols + col)
+
   def swipe(), do: raise("Unimplemented")
 
-  def mark(), do: raise("Unimplemented")
+  @doc "Marks the cell as possible mine"
+  @spec mark(board(), non_neg_integer(), non_neg_integer()) :: board()
+  def mark(board, row, col) do
+    %{board | cells: Enum.map(board.cells, fn {row, col, _, _} = cell -> Cell.mark(cell) end)}
+  end
 
   def flag(), do: raise("Unimplemented")
 
   def decide(), do: raise("Unimplemented")
-
-  @doc "True if the given cell is a mine, false otherwise"
-  @spec mine?(cell()) :: boolean()
-  def mine?({_, _, :mine, _}), do: true
-  def mine?(_), do: false
-
-  @doc "True if the given cell is unexplored, false otherwise"
-  @spec unexplored?(cell()) :: boolean()
-  def unexplored?({_, _, _, :unexplored}), do: true
-  def unexplored?(_), do: false
 
   #
   # Private functions
