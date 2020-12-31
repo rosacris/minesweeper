@@ -50,7 +50,8 @@ defmodule Minesweeper.Board do
   @spec get_cell(board(), non_neg_integer(), non_neg_integer()) :: Cell.t()
   def get_cell(board, row, col) when is_in_board(board, row, col),
     do: Enum.at(board.cells, row * board.cols + col)
-  def get_cell(_, _, _), do: raise "Invalid cell"
+
+  def get_cell(_, _, _), do: raise("Invalid cell")
 
   def swipe(), do: raise("Unimplemented")
 
@@ -65,9 +66,22 @@ defmodule Minesweeper.Board do
 
     %{board | cells: updated_cells}
   end
-  def mark(_, _, _), do: raise "Invalid cell"
 
-  def flag(), do: raise("Unimplemented")
+  def mark(_, _, _), do: raise("Invalid cell")
+
+  @doc "Flag the cell as a mine"
+  @spec flag(board(), non_neg_integer(), non_neg_integer()) :: board()
+  def flag(board, row, col) when is_in_board(board, row, col) do
+    updated_cells =
+      Enum.map(board.cells, fn
+        {^row, ^col, _, _} = cell -> Cell.flag(cell)
+        cell -> cell
+      end)
+
+    %{board | cells: updated_cells}
+  end
+
+  def flag(_, _, _), do: raise("Invalid cell")
 
   def decide(), do: raise("Unimplemented")
 

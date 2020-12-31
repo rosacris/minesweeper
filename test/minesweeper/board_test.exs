@@ -30,16 +30,41 @@ defmodule Minesweeper.BoardTest do
 
   test "mark a cell" do
     board = Board.new(10, 20, 50, @rnd_seed)
-    updated_board = Board.mark(board, 5, 5)
 
-    assert Board.get_cell(updated_board, 5, 5) |> Board.Cell.marked?()
+    # Cell outside board dimensions fail
     assert_raise(RuntimeError, "Invalid cell", fn -> Board.mark(board, 100, 100) end)
 
-    # Multiple two marks in the same cell removes the mark
+    # One mark set the cell as marked
+    assert board
+           |> Board.mark(5, 5)
+           |> Board.get_cell(5, 5)
+           |> Board.Cell.marked?()
+
+    # Two marks in the same cell removes the mark
     refute board
            |> Board.mark(1, 2)
            |> Board.mark(1, 2)
            |> Board.get_cell(1, 2)
            |> Board.Cell.marked?()
+  end
+
+  test "flag a cell" do
+    board = Board.new(10, 20, 50, @rnd_seed)
+
+    # Cell outside board dimensions fails
+    assert_raise(RuntimeError, "Invalid cell", fn -> Board.flag(board, 100, 100) end)
+
+    # One mark set the cell as flagged
+    assert board
+           |> Board.flag(5, 5)
+           |> Board.get_cell(5, 5)
+           |> Board.Cell.flagged?()
+
+    # Two marks in the same cell removes the flag
+    refute board
+           |> Board.flag(1, 2)
+           |> Board.flag(1, 2)
+           |> Board.get_cell(1, 2)
+           |> Board.Cell.flagged?()
   end
 end
