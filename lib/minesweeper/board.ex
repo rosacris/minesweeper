@@ -102,7 +102,19 @@ defmodule Minesweeper.Board do
 
   def swipe(_, _, _), do: raise("Invalid cell")
 
-  def decide(), do: raise("Unimplemented")
+  @doc "Decides the given board"
+  @spec decide(board()) :: :undecided | :won | :lost
+  def decide(board) do
+    if lost?(board.cells) do
+      :lost
+    else
+      if won?(board.cells) do
+        :won
+      else
+        :undecided
+      end
+    end
+  end
 
   #
   # Private functions
@@ -123,6 +135,7 @@ defmodule Minesweeper.Board do
       else
         []
       end
+
     # This recursive call eventually ends because it is bounded by the explored cells set
     # It can only grow up to the size of the board.
     do_swipe(
@@ -173,5 +186,15 @@ defmodule Minesweeper.Board do
       end)
 
     Enum.sort(cells_not_updated ++ updated_cells)
+  end
+
+  # True if a mine has benn cleared
+  defp lost?(cells) do
+    Enum.any?(cells, fn cell -> Cell.mine?(cell) && Cell.cleared?(cell) end)
+  end
+
+  # True if all mines have benn flagged
+  defp won?(cells) do
+    not Enum.any?(cells, fn cell -> Cell.mine?(cell) and not Cell.flagged?(cell) end)
   end
 end

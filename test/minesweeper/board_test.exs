@@ -118,4 +118,26 @@ defmodule Minesweeper.BoardTest do
       end
     end
   end
+
+  test "decide test" do
+    board = Board.new(4, 4, 2, @rnd_seed)
+
+    # The generated board used along this test is the following
+
+    # |   |   | * |   |
+    # |   |   |   |   |
+    # |   |   |   |   |
+    # |   |   | * |   |
+
+    # Mines at (0, 2) and (3, 2)
+
+    # Game is lost after swiping a mine
+    assert board|> Board.swipe(0, 2) |> Board.decide() == :lost
+
+    # Game is won after flagging all mines
+    assert board |> Board.flag(0, 2) |> Board.flag(3, 2) |> Board.decide() == :won
+
+    # Game is undecided if any mine remains to be flagged
+    assert board |> Board.flag(0, 2) |> Board.decide() == :undecided
+  end
 end
