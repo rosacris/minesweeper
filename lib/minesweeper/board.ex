@@ -53,8 +53,6 @@ defmodule Minesweeper.Board do
 
   def get_cell(_, _, _), do: raise("Invalid cell")
 
-  def swipe(), do: raise("Unimplemented")
-
   @doc "Marks the cell as possible mine"
   @spec mark(board(), non_neg_integer(), non_neg_integer()) :: board()
   def mark(board, row, col) when is_in_board(board, row, col) do
@@ -83,9 +81,97 @@ defmodule Minesweeper.Board do
 
   def flag(_, _, _), do: raise("Invalid cell")
 
+  @doc "Swipes a board cell"
+  @spec swipe(board(), non_neg_integer(), non_neg_integer()) :: board()
+  def swipe(board, row, col) when is_in_board(board, row, col) do
+    cell = get_cell(board, row, col)
+
+    swiped_cells =
+      if Cell.cleared?(cell) or Cell.flagged?(cell) do
+        []
+      else
+        if Cell.mine?(cell) do
+          [Cell.swipe(cell)]
+        else
+          do_swipe(board, [cell], [], [])
+        end
+      end
+
+    %{board | cells: update_cells(board.cells, swiped_cells)}
+  end
+
+  def swipe(_, _, _), do: raise("Invalid cell")
+
   def decide(), do: raise("Unimplemented")
 
   #
   # Private functions
   #
+
+  # Runs recursively the swipe algorithm until there are no more cells to explore
+  defp do_swipe(_board, [], _, swiped), do: swiped
+
+  defp do_swipe(board, [cell | to_explore], explored, swiped) do
+    adjacent_cells_to_explore =
+      if count_adjacent_mines(board, cell) == 0 do
+        board
+        |> get_adjacent_cells(cell)
+        |> Enum.filter(fn adj_cell ->
+          not Cell.cleared?(adj_cell) && not Enum.member?(to_explore, adj_cell) &&
+            not Enum.member?(explored, adj_cell)
+        end)
+      else
+        []
+      end
+    # This recursive call eventually ends because it is bounded by the explored cells set
+    # It can only grow up to the size of the board.
+    do_swipe(
+      board,
+      to_explore ++ adjacent_cells_to_explore,
+      [cell | explored],
+      [Cell.swipe(cell) | swiped]
+    )
+  end
+
+  # Counts the amount of mines around the given `cell`
+  defp count_adjacent_mines(board, cell) do
+    board
+    |> get_adjacent_cells(cell)
+    |> Enum.count(fn cell -> Cell.mine?(cell) end)
+  end
+
+  # Returns a list of adjacent cells of `row` `col` that lay inside the board
+  defp get_adjacent_cells(board, cell) do
+    {row, col} = Cell.position(cell)
+
+    [
+      {row - 1, col - 1},
+      {row - 1, col},
+      {row - 1, col + 1},
+      {row, col - 1},
+      {row, col + 1},
+      {row + 1, col - 1},
+      {row + 1, col},
+      {row + 1, col + 1}
+    ]
+    |> Enum.filter(fn
+      {row, col} when is_in_board(board, row, col) -> true
+      _ -> false
+    end)
+    |> Enum.map(fn {row, col} -> get_cell(board, row, col) end)
+  end
+
+  # Replaces all the cell positions in `cells` that occur in `updated_cells`
+  defp update_cells(cells, updated_cells) do
+    # Keep the unchanged cells by filtering the ones in a position that appears in
+    # the list of updated cells.
+    cells_not_updated =
+      cells
+      |> Enum.reject(fn cell ->
+        updated_cells
+        |> Enum.any?(fn updated_cell -> Cell.position(cell) == Cell.position(updated_cell) end)
+      end)
+
+    Enum.sort(cells_not_updated ++ updated_cells)
+  end
 end
