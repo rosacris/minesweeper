@@ -28,7 +28,9 @@ defmodule Minesweeper.Board do
   the board generation deterministic (i.e. for testing).
   """
   @spec new(non_neg_integer(), non_neg_integer(), non_neg_integer(), any()) :: board()
-  def new(rows, cols, mines_amount, seed \\ nil) do
+  def new(rows, cols, mines_amount, seed \\ nil)
+
+  def new(rows, cols, mines_amount, seed) when mines_amount < rows * cols and mines_amount > 0 do
     # Seed the random number generator if given to recreate the same board.
     if seed, do: :rand.seed(:exrop, seed)
 
@@ -45,6 +47,8 @@ defmodule Minesweeper.Board do
 
     %{rows: rows, cols: cols, cells: cells}
   end
+
+  def new(_, _, _, _), do: raise("Invalid board dimensions")
 
   @doc "Returns the cell at `row` `col`"
   @spec get_cell(board(), non_neg_integer(), non_neg_integer()) :: Cell.t()

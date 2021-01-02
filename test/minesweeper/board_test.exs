@@ -18,6 +18,8 @@ defmodule Minesweeper.BoardTest do
     assert Enum.count(board.cells) == 200
     assert Enum.count(board.cells, &Board.Cell.mine?/1) == 50
     assert Enum.all?(board.cells, &Board.Cell.unexplored?/1)
+
+    assert_raise(RuntimeError, "Invalid board dimensions", fn -> Board.new(2, 2, 10) end)
   end
 
   test "get a cell" do
