@@ -120,6 +120,23 @@ defmodule Minesweeper.Board do
     end
   end
 
+  @doc """
+  Returns a list of lists with the state of each cell in the board.
+
+  Optionally it can reveal the location of the mines.
+  """
+  @spec format(board(), boolean()) :: list(list(String.t()))
+  def format(board, reveal \\ false) do
+    %{cols: cols, cells: cells} = board
+
+    cells
+    |> Enum.chunk_every(cols)
+    |> Enum.map(fn row ->
+      row
+      |> Enum.map(fn cell -> Cell.to_string(cell, count_adjacent_mines(board, cell), reveal) end)
+    end)
+  end
+
   #
   # Private functions
   #
