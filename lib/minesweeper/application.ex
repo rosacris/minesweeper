@@ -1,19 +1,19 @@
 defmodule Minesweeper.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
-  @moduledoc false
+  @moduledoc "OTP Application specification for Minesweeper"
 
   use Application
 
   @impl true
   def start(_type, _args) do
     children = [
-      # Starts a worker by calling: Minesweeper.Worker.start_link(arg)
-      # {Minesweeper.Worker, arg}
+      # Use Plug.Cowboy.child_spec/3 to register our endpoint as a plug
+      Plug.Cowboy.child_spec(
+        scheme: :http,
+        plug: Minesweeper.Endpoint,
+        options: [port: Application.get_env(:minesweeper, :port)]
+      )
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Minesweeper.Supervisor]
     Supervisor.start_link(children, opts)
   end

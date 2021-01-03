@@ -14,8 +14,8 @@ defmodule Minesweeper.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      applications: [:memento],
-      extra_applications: [:logger],
+      applications: [:memento, :poison],
+      extra_applications: [:logger, :plug_cowboy],
       mod: {Minesweeper.Application, []}
     ]
   end
@@ -23,7 +23,9 @@ defmodule Minesweeper.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:memento, "~> 0.3.1"}
+      {:memento, "~> 0.3.1"},
+      {:plug_cowboy, "~> 2.4"},
+      {:poison, "~> 4.0"}
     ]
   end
 end
