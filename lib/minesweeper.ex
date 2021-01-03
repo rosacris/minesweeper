@@ -20,9 +20,19 @@ defmodule Minesweeper do
   # Public API
   #
 
+  @doc "List all user games"
+  @spec list_games(user_id()) :: [game_id()]
+  def list_games(user_id) do
+    try do
+      Game.list(user_id) |> Enum.map(fn game -> Map.fetch!(game, :id) end)
+    rescue
+      e -> {:error, e.message}
+    end
+  end
+
   @doc "Starts a new game for `user_id`"
   @spec new_game(user_id(), non_neg_integer(), non_neg_integer(), non_neg_integer()) ::
-          game() | error()
+          game_id() | error()
   def new_game(user_id, rows, cols, mines) do
     try do
       board = Board.new(rows, cols, mines)
@@ -34,6 +44,7 @@ defmodule Minesweeper do
         board: board
       }
       |> Game.new()
+      |> Map.fetch!(:id)
     rescue
       e -> {:error, e.message}
     end

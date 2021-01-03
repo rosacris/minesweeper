@@ -7,6 +7,12 @@ defmodule Minesweeper.Game do
     type: :ordered_set,
     autoincrement: true
 
+  @doc "List of user games"
+  @spec list(Minesweeper.user_id()) :: [Memento.Table.record()]
+  def list(user_id) do
+    Memento.transaction!(fn -> Memento.Query.select(__MODULE__, {:==, :user_id, user_id}) end)
+  end
+
   @doc "Creates a new `game`"
   @spec new(Memento.Table.record()) :: Memento.Table.record()
   def new(game) do

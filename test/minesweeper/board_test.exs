@@ -1,4 +1,10 @@
 defmodule Minesweeper.BoardTest do
+  @moduledoc """
+  Tests for the game logic.
+
+  Game logic is written in a purely functional and effect-free way that can be easily tested
+  by generating new board instances and chaining the operations on the board.
+  """
   use ExUnit.Case
 
   alias Minesweeper.Board
