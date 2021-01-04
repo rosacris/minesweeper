@@ -80,9 +80,7 @@ defmodule Minesweeper.AuthRouter do
     try do
       # Parse call parameters
       game_id = String.to_integer(game_id)
-      %{"row" => row_param, "col" => col_param, "status" => status} = conn.body_params
-      row = String.to_integer(row_param)
-      col = String.to_integer(col_param)
+      %{"row" => row, "col" => col, "status" => status} = conn.body_params
       user_id = conn.assigns.user_id
 
       # Execute request

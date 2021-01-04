@@ -93,7 +93,7 @@ defmodule Minesweeper.EndpointTest do
     game_id = new_game(token, 10, 10, 10) |> Map.get("id")
 
     # Mark a cell
-    cell = %{"row" => "2", "col" => "2", "status" => "?"}
+    cell = %{"row" => 2, "col" => 2, "status" => "?"}
 
     conn =
       conn(:put, "/games/#{game_id}/board", cell)
@@ -107,7 +107,7 @@ defmodule Minesweeper.EndpointTest do
     assert updated_game["board"] |> Enum.at(2) |> Enum.at(2) == "?"
 
     # Flag a cell
-    cell = %{"row" => "4", "col" => "4", "status" => "F"}
+    cell = %{"row" => 4, "col" => 4, "status" => "F"}
 
     conn =
       conn(:put, "/games/#{game_id}/board", cell)
@@ -121,7 +121,7 @@ defmodule Minesweeper.EndpointTest do
     assert updated_game["board"] |> Enum.at(4) |> Enum.at(4) == "F"
 
     # Swipe a cell
-    cell = %{"row" => "6", "col" => "6", "status" => " "}
+    cell = %{"row" => 6, "col" => 6, "status" => " "}
 
     conn =
       conn(:put, "/games/#{game_id}/board", cell)
