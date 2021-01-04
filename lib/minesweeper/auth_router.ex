@@ -51,11 +51,7 @@ defmodule Minesweeper.AuthRouter do
   post "/" do
     try do
       # Parse call parameters
-      conn = fetch_query_params(conn)
-      %{"rows" => rows_param, "cols" => cols_param, "mines" => mines_param} = conn.params
-      rows = String.to_integer(rows_param)
-      cols = String.to_integer(cols_param)
-      mines = String.to_integer(mines_param)
+      %{"rows" => rows, "cols" => cols, "mines" => mines} = conn.body_params
 
       # Execute request
       action_result = Minesweeper.new_game(conn.assigns.user_id, rows, cols, mines)

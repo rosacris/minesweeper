@@ -144,8 +144,8 @@ defmodule Minesweeper.EndpointTest do
   # Private functions
   #
 
-  defp new_game(token, cols, rows, mines) do
-    conn(:post, "/games?rows=#{rows}&cols=#{cols}&mines=#{mines}")
+  defp new_game(token, rows, cols, mines) do
+    conn(:post, "/games", %{"rows" => rows, "cols" => cols, "mines" => mines})
     |> put_req_header("authorization", token)
     |> Endpoint.call(@opts)
     |> Map.get(:resp_body)
