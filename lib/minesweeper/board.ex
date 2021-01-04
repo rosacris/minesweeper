@@ -3,7 +3,12 @@ defmodule Minesweeper.Board do
 
   alias Minesweeper.Board.Cell
 
-  @type board :: %{rows: non_neg_integer(), cols: non_neg_integer(), cells: list(Cell.t())}
+  @type board :: %{
+          rows: non_neg_integer(),
+          cols: non_neg_integer(),
+          mines: non_neg_integer(),
+          cells: list(Cell.t())
+        }
 
   #
   # Macros
@@ -45,7 +50,7 @@ defmodule Minesweeper.Board do
       |> Enum.zip(payloads)
       |> Enum.map(fn {{row, col}, payload} -> Cell.new(row, col, payload, :unexplored) end)
 
-    %{rows: rows, cols: cols, cells: cells}
+    %{rows: rows, cols: cols, cells: cells, mines: mines_amount}
   end
 
   def new(_, _, _, _), do: raise("Invalid board dimensions")

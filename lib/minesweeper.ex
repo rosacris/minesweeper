@@ -13,7 +13,8 @@ defmodule Minesweeper do
           board: list(list(String.t())),
           game_status: :undecided | :won | :lost,
           started_at: DateTime.t(),
-          ended_at: DateTime.t() | nil
+          ended_at: DateTime.t() | nil,
+          mines: non_neg_integer()
         }
   @type error :: {:error, String.t()}
 
@@ -62,7 +63,8 @@ defmodule Minesweeper do
           started_at: game.started_at,
           ended_at: game.ended_at,
           game_status: Board.decide(game.board),
-          board: Board.format(game.board, reveal)
+          board: Board.format(game.board, reveal),
+          mines: game.board.mines
         }
 
       error ->
