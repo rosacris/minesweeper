@@ -2,7 +2,7 @@ defmodule Minesweeper.Game do
   @moduledoc "Schema representation of a Game"
 
   use Memento.Table,
-    attributes: [:id, :user_id, :started_at, :board],
+    attributes: [:id, :user_id, :started_at, :ended_at, :board],
     index: [:user_id],
     type: :ordered_set,
     autoincrement: true

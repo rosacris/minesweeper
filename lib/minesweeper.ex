@@ -12,7 +12,8 @@ defmodule Minesweeper do
           user_id: user_id(),
           board: list(list(String.t())),
           game_status: :undecided | :won | :lost,
-          started_at: DateTime.t()
+          started_at: DateTime.t(),
+          ended_at: DateTime.t() | nil
         }
   @type error :: {:error, String.t()}
 
@@ -59,6 +60,7 @@ defmodule Minesweeper do
           id: game.id,
           user_id: game.user_id,
           started_at: game.started_at,
+          ended_at: game.ended_at,
           game_status: Board.decide(game.board),
           board: Board.format(game.board, reveal)
         }
@@ -90,11 +92,29 @@ defmodule Minesweeper do
   # Private functions
   #
 
-  # This is a helper function that runs an update function in a user game cell
+  # This is a helper function that runs an update function in a user game cell if the game
+  # is not decided yet, otherwise it leaves the game unchanged.
   defp change_cell(user_id, game_id, row, col, update_function) do
     try do
-      Game.update_game(user_id, game_id, fn game ->
-        %{game | board: game |> Map.fetch!(:board) |> (&update_function.(&1, row, col)).()}
+      Game.update_game(user_id, game_id, fn
+        # If game is not ended, run the change
+        %Game{ended_at: nil} = game ->
+          updated_board =
+            game
+            |> Map.fetch!(:board)
+            |> (&update_function.(&1, row, col)).()
+
+          # Update ended_at time if the board was decided after applying the last change
+          ended_at =
+            if Board.decide(updated_board) != :undecided do
+              DateTime.utc_now()
+            end
+
+          %{game | board: updated_board, ended_at: ended_at}
+
+        # Otherwise just leave the game as it is
+        game ->
+          game
       end)
     rescue
       e -> {:error, e.message}
