@@ -35,4 +35,9 @@ defmodule Minesweeper.Endpoint do
   end
 
   forward("/games", to: Minesweeper.AuthRouter)
+
+  # Catchall route
+  match _ do
+    send_resp(conn, 404, "oops... Nothing here :(")
+  end
 end
