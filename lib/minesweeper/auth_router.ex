@@ -8,9 +8,6 @@ defmodule Minesweeper.AuthRouter do
   # Plug pipeline
   #
 
-  # Request logger
-  plug(Plug.Logger)
-
   plug(Minesweeper.Auth)
 
   # Routes matcher
