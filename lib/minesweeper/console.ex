@@ -12,6 +12,7 @@ defmodule Minesweeper.Console do
     Memento.stop()
     Memento.Schema.create(nodes)
     Memento.start()
+    Memento.Table.create!(Minesweeper.User, disc_copies: nodes)
     Memento.Table.create!(Minesweeper.Game, disc_copies: nodes)
   end
 end

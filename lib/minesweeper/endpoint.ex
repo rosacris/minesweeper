@@ -1,7 +1,6 @@
 defmodule Minesweeper.Endpoint do
   @moduledoc """
-  A Plug responsible for logging request info, parsing request body's as JSON,
-  matching routes, and dispatching responses.
+  A router for the non authenticated endpoints
   """
   use Plug.Router
 
@@ -21,100 +20,19 @@ defmodule Minesweeper.Endpoint do
   # Dispatch responses
   plug(:dispatch)
 
-  # TODO: replace placeholder once authentication is in place
-  @user_id 1
-
   #
   # Routes
   #
 
-  # Lists games
-  get "/games" do
-    try do
-      game_ids = Minesweeper.list_games(@user_id)
-      send_resp(conn, 200, Poison.encode!(game_ids))
-    rescue
-      e -> send_resp(conn, 400, error_message(e.message))
+  # Logins a user
+  post "/login" do
+    %{"username" => username, "password" => password} = conn.body_params
+
+    case Minesweeper.User.login(username, password) do
+      {:error, _} -> send_resp(conn, 401, "")
+      token -> send_resp(conn, 200, Poison.encode!(%{token: token}))
     end
   end
 
-  # Gets single game
-  get "/games/:game_id" do
-    try do
-      game_id = String.to_integer(game_id)
-      game = Minesweeper.get_game(1, game_id, false)
-      send_resp(conn, 200, Poison.encode!(game))
-    rescue
-      e -> send_resp(conn, 400, error_message(e.message))
-    end
-  end
-
-  # Creates a new game
-  post "/games" do
-    try do
-      # Parse call parameters
-      conn = fetch_query_params(conn)
-      %{"rows" => rows_param, "cols" => cols_param, "mines" => mines_param} = conn.params
-      rows = String.to_integer(rows_param)
-      cols = String.to_integer(cols_param)
-      mines = String.to_integer(mines_param)
-
-      # Execute request
-      action_result = Minesweeper.new_game(@user_id, rows, cols, mines)
-
-      # Generate response
-      case action_result do
-        {:error, message} ->
-          send_resp(conn, 400, error_message(message))
-
-        game_id ->
-          # Fetch game and send response
-          game = Minesweeper.get_game(@user_id, game_id)
-          send_resp(conn, 201, Poison.encode!(game))
-      end
-    rescue
-      e -> send_resp(conn, 400, error_message(e.message))
-    end
-  end
-
-  # Changes a cell in the board of a game (for marking, flagging, swiping)
-  put "/games/:game_id/board" do
-    try do
-      # Parse call parameters
-      game_id = String.to_integer(game_id)
-      %{"row" => row_param, "col" => col_param, "status" => status} = conn.body_params
-      row = String.to_integer(row_param)
-      col = String.to_integer(col_param)
-
-      # Execute request
-      action_result =
-        case status do
-          "?" -> Minesweeper.mark(@user_id, game_id, row, col)
-          "F" -> Minesweeper.flag(@user_id, game_id, row, col)
-          " " -> Minesweeper.swipe(@user_id, game_id, row, col)
-          _ -> {:error, "Invalid status"}
-        end
-
-      # Generate response
-      case action_result do
-        :ok -> send_resp(conn, 200, "")
-        {:error, message} -> send_resp(conn, 400, error_message(message))
-      end
-    rescue
-      e -> send_resp(conn, 400, error_message(e.message))
-    end
-  end
-
-  # Catchall route
-  match _ do
-    send_resp(conn, 404, "oops... Nothing here :(")
-  end
-
-  #
-  # Private functions
-  #
-
-  defp error_message(message) do
-    Poison.encode!(%{message: message})
-  end
+  forward("/games", to: Minesweeper.AuthRouter)
 end
