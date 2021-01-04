@@ -28,7 +28,7 @@ defmodule Minesweeper.User do
 
       case Memento.Query.select(__MODULE__, guards) do
         [%__MODULE__{} = user] ->
-          token = :crypto.hash(:sha256, "whatever") |> Base.encode16()
+          token = :crypto.hash(:sha256, :crypto.strong_rand_bytes(16)) |> Base.encode16()
           expires_at = DateTime.utc_now() |> DateTime.add(3600, :second)
 
           %{user | token: token, expires_at: expires_at}
