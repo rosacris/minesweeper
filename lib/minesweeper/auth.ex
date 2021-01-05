@@ -22,16 +22,6 @@ defmodule Minesweeper.Auth do
   # Private functions
   #
 
-  defp send_401(
-         conn,
-         data \\ %{message: "Please make sure you have authentication header"}
-       ) do
-    conn
-    |> put_resp_content_type("application/json")
-    |> send_resp(401, Poison.encode!(data))
-    |> halt
-  end
-
   defp get_auth_header(conn) do
     case get_req_header(conn, "authorization") do
       [token] -> {conn, token}
@@ -48,5 +38,12 @@ defmodule Minesweeper.Auth do
 
   defp authenticate({conn}) do
     send_401(conn)
+  end
+
+  defp send_401(conn) do
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(401, Poison.encode!(%{message: "Invalid authentication header"}))
+    |> halt
   end
 end

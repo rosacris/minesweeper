@@ -29,7 +29,7 @@ defmodule Minesweeper.AuthRouter do
       game_ids = Minesweeper.list_games(conn.assigns.user_id)
       send_resp(conn, 200, Poison.encode!(game_ids))
     rescue
-      e -> send_resp(conn, 400, error_message(e.message))
+      _ -> send400(conn)
     end
   end
 
@@ -40,7 +40,7 @@ defmodule Minesweeper.AuthRouter do
       game = Minesweeper.get_game(conn.assigns.user_id, game_id, false)
       send_resp(conn, 200, Poison.encode!(game))
     rescue
-      e -> send_resp(conn, 400, error_message(e.message))
+      _ -> send400(conn)
     end
   end
 
@@ -56,7 +56,7 @@ defmodule Minesweeper.AuthRouter do
       # Generate response
       case action_result do
         {:error, message} ->
-          send_resp(conn, 400, error_message(message))
+          send400(message)
 
         game_id ->
           # Fetch game and send response
@@ -64,7 +64,7 @@ defmodule Minesweeper.AuthRouter do
           send_resp(conn, 201, Poison.encode!(game))
       end
     rescue
-      e -> send_resp(conn, 400, error_message(e.message))
+      _ -> send400(conn)
     end
   end
 
@@ -88,10 +88,10 @@ defmodule Minesweeper.AuthRouter do
       # Generate response
       case action_result do
         :ok -> send_resp(conn, 200, "")
-        {:error, message} -> send_resp(conn, 400, error_message(message))
+        {:error, message} -> send400(conn, message)
       end
     rescue
-      e -> send_resp(conn, 400, error_message(e.message))
+      _ -> send400(conn)
     end
   end
 
@@ -104,7 +104,8 @@ defmodule Minesweeper.AuthRouter do
   # Private functions
   #
 
-  defp error_message(message) do
-    Poison.encode!(%{message: message})
+  defp send400(conn, message \\ "Bad request") do
+    response = %{message: message}
+    send_resp(conn, 400, Poison.encode!(response))
   end
 end
